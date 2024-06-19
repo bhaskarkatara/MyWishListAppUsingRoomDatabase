@@ -2,6 +2,7 @@ package com.example.mywishlistapp
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
@@ -9,6 +10,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.mywishlistapp.data.Wish
 
 @Composable
 
@@ -27,6 +32,17 @@ fun AddEditDetailView(
     viewModel: WishViewModel,
     navController: NavController
 ){
+
+    val snackMessage = remember {
+        mutableStateOf("")
+    }
+
+    val scope = rememberCoroutineScope()
+     val  scaffoldState = rememberScaffoldState()
+
+
+
+
     Scaffold (
         topBar = { AppBarView(title = if(id == 0L) "Add Wish" else "update Wish") {navController.navigateUp()} }
     ){
@@ -52,13 +68,32 @@ fun AddEditDetailView(
              Button(onClick = {
                  if(viewModel.wishTitleState.isNotEmpty()
                      && viewModel.wishDescriptionState.isNotEmpty()){
-                        // update wish
-                 }else{
-                     // add wish
+                     if(id != 0L){
+
+                         // todo update wish
+                     }else {
+                         //  add a wish
+                         viewModel.addWish(
+                             Wish(
+                                 title = viewModel.wishTitleState.trim(),
+                                 description = viewModel.wishDescriptionState.trim()
+                             )
+                         )
+                         snackMessage.value = "wish has been created"
+                     }
+
+                  }else{
+
+                      snackMessage.value = "please fill all fields to create wish"
+
+
                   }
              }) {
                  Text(text =  if(id == 0L) "Add Wish" else "update Wish", style = TextStyle(fontSize = 18.sp))
              }
+
+             Spacer(modifier = Modifier.height(40.dp))
+             Text(text = "Made by ❤️Kataraji")
          }
     }
 
@@ -89,7 +124,7 @@ fun WishTextField(
         )
     )
 }
-@Preview()
+@Preview
 @Composable
 fun WishTest(){
     WishTextField(label = "text", value = "text", onValueChanges = {})
